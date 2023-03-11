@@ -11,9 +11,13 @@ Temp = TempCabinet				#текущая температура термостат�
 '''текущая температура термостата.'''
 TempDiff = 0
 '''ошибка управления по температуре'''
+Temp_before_Inerc = 0
+'''температура в момент начала инерционного нагрева.'''
 Temp_before_Cooling = TempCabinet	#температура в момент начала охлаждения. Нужна для расчёта текущей температуры при охлжадении.
 '''температура в момент начала охлаждения.'''
-TimeMod = 20					#длительность моделирования.
+Cooling = 0
+'''остывание'''
+TimeMod = 400					#длительность моделирования.
 '''длительность моделирования.'''
 TimeStep = 0.1					#шаг изменеиня времени, значение должно быть кратно целым числам.
 '''шаг изменеиня времени, значение должно быть кратно целым числам.'''
@@ -25,7 +29,7 @@ Time_Сooling = 0					#время от начала остывания.
 '''время от начала остывания.'''
 t = 0							#переменная времени.
 '''переменная времени.'''
-PWM_period = 20					#период шим генератора в секундах.
+PWM_period = 4					#период шим генератора в секундах.
 '''период шим генератора в секундах.'''
 PWM_ON = 0							#текущее значение ШИМ генератора, меняется от 0 до PWM_period секунд.
 '''длинна импульса ШИМ генератора в текущем периоде, меняется от 0 до PWM_period секунд.'''
@@ -64,7 +68,7 @@ while t <= TimeMod:
 		arr_Temp_Integral.append(round(TempDiff,Number_of_decimals))    #добавляет ошибку температуры в конец массива.
 		del arr_Temp_Integral[0]
 		#Вычисляем реакцию ПИД регулятора на сигнал ошибки
-		PID_proportionally =- K_proportionally * TempDiff
+		PID_proportionally = K_proportionally * TempDiff
 		PID_integral = K_integral * sum(arr_Temp_Integral)
 		PID_differential = K_differential*(TempDiff - arr_Temp_Integral[-1 * Differential])
 		PID = PID_proportionally + PID_integral + PID_differential
@@ -77,21 +81,23 @@ while t <= TimeMod:
 			PWM_ON = PWM_min * round(PID*PWM_Step)
 		if (PID<=0):
 			PWM_ON = 0
-	if (t-(PWM_N-1) * PWM_period <= PWM_ON):	# проверяем включен ли ШИМ в данный момент времени.
+	if (t-(PWM_N-1) * PWM_period < PWM_ON):	# проверяем включен ли ШИМ в данный момент времени.
 		Ten = True
-		Temp = Temp + 160 * (1-2.115384 * math.exp(-1 / 1100 * t) + 1.115384 * math.exp(-1 / 580 * t))
+		Time_Сooling = 0
+		Temp = Temp + 160 * (1-2.115384 * math.exp(-1 / 1100 * Ten_time_on) + 1.115384 * math.exp(-1 / 580 * Ten_time_on))
 		Ten_time_on = Ten_time_on + TimeStep
 	else:
 		#Расчитываем время инерционного нагрева один раз после выключения тена.
 		if (Ten == True):
 			Ten = False
-			Time_Inerc_duration = t + 650 +(1-math.exp(-1 / 20 * Ten_time_on))
+			Time_Inerc_duration = t + 650 * (1-math.exp(-1 / 20 * Ten_time_on))
 			Ten_time_on = 0
 			Inertia = True
+			Temp_before_Inerc = Temp
 		#Изменение температуры при инерционном нагреве.
 		if(t<=Time_Inerc_duration) and (Ten == False):
 			Time_Inerc = Time_Inerc + TimeStep
-			Temp = Temp + 5.75 * (1-math.exp(-1 / 146 * Time_Inerc))
+			Temp = Temp_before_Inerc + 5.75 * (1 - 1 / math.exp(Time_Inerc/ 146))
 		else:
 			#Остывание
 			#В первый момент остывания
@@ -102,16 +108,22 @@ while t <= TimeMod:
 				Temp_before_Cooling = Temp
 			#Изменение температуры при остывании.
 			Time_Сooling = Time_Сooling + TimeStep
-			Temp = TempCabinet + (Temp_before_Cooling - TempCabinet) * math.exp(-1 /4173 * Time_Сooling)
-	#Вычисляем следующее значение времени
+			Cooling = (Temp_before_Cooling - TempCabinet) * math.exp(-1 /4173 * Time_Сooling)
+			Temp = TempCabinet + Cooling
+			# Temp = TempCabinet + (Temp_before_Cooling - TempCabinet) * math.exp(-1 /4173 * Time_Сooling)
+ 			
+	print('t=', round(t,1), 'PID=', round(PID,1), 'Temp=',round(Temp,2), 'Ten=', Ten, 'Cooling=',round(Cooling,3), 'Time_Сooling=',round(Time_Сooling,1), 'Time_Inerc=',round(Time_Inerc,1))
+	#print('PID=',PID)
+	#print('Temp=',Temp)
+    #Вычисляем следующее значение времени
 	t = round((t + TimeStep),Number_of_decimals)
 	
 	
 	
 	
-	print(arr_Temp_Integral)
-	print(t)
-	Temp = Temp + TimeStep
+	#print(arr_Temp_Integral)
+	
+	# Temp = Temp + TimeStep
 	
 
 
