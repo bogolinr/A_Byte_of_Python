@@ -3,6 +3,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 
+Cooling = False
 TempCabinet = 25				#начальная температура.
 '''начальная температура.'''
 TempUstavka = 30				#целевая температура, которую должен поддерживать термостат.
@@ -19,7 +20,7 @@ Temp_before_Cooling = TempCabinet	#температура в момент нач
 '''температура в момент начала охлаждения.'''
 Cooling = 0
 '''остывание'''
-TimeMod = 100					#длительность моделирования.
+TimeMod = 4000					#длительность моделирования.
 '''длительность моделирования.'''
 TimeStep = 0.1					#шаг изменеиня времени, значение должно быть кратно целым числам.
 '''шаг изменеиня времени, значение должно быть кратно целым числам.'''
@@ -65,9 +66,18 @@ K_differential = 0				#коэффициэнт дифференциальной �
 time_for_plot = np.array([])
 temp_for_plot = np.array([])
 
+ten_for_plot = np.array([])
+inertia_for_plot = np.array([])
+cooling_for_plot = np.array([])
+
+
 while t <= TimeMod:
 	time_for_plot = np.append(time_for_plot, [t])
 	temp_for_plot = np.append(temp_for_plot, [Temp])
+	ten_for_plot= np.append(ten_for_plot, [Ten])
+	inertia_for_plot= np.append(inertia_for_plot, [Inertia*0.5])
+	cooling_for_plot= np.append(cooling_for_plot, [Cooling*1.5])
+	
 	TempDiff = TempUstavka - Temp
 	
 	#Реальный датчик температуры выдаёт значения один раз в секунду, поэтому записываем в массив
@@ -94,6 +104,8 @@ while t <= TimeMod:
 			Temp_before_Ten = Temp
 		Ten = True
 		Time_Сooling = 0
+		Inertia = False
+		Cooling = False
 		Temp = Temp_before_Ten + 160 * (1-2.115384 * math.exp(-1 / 1100 * Ten_time_on) + 1.115384 * math.exp(-1 / 580 * Ten_time_on))
 		Ten_time_on = Ten_time_on + TimeStep
 		
@@ -116,14 +128,14 @@ while t <= TimeMod:
 				Time_Inerc_duration = 0
 				Time_Inerc = 0
 				Inertia = False
+				Cooling = True
 				Temp_before_Cooling = Temp
 			#Изменение температуры при остывании.
 			Time_Сooling = Time_Сooling + TimeStep
-			Cooling = (Temp_before_Cooling - TempCabinet) * math.exp(-1 /4173 * Time_Сooling)
-			Temp = TempCabinet + Cooling
+			Temp = TempCabinet + (Temp_before_Cooling - TempCabinet) * math.exp(-1 /4173 * Time_Сooling)
 			# Temp = TempCabinet + (Temp_before_Cooling - TempCabinet) * math.exp(-1 /4173 * Time_Сooling)
  			
-	print('t=', round(t,1), 'PID=', round(PID,1), 'Temp=',round(Temp,2), 'Ten=', Ten, 'Temp_before_Ten=',round(Temp_before_Ten,3), 'Time_Сooling=',round(Time_Сooling,1), 'Time_Inerc=',round(Time_Inerc,1))
+	# print('t=', round(t,1), 'PID=', round(PID,1), 'Temp=',round(Temp,2), 'Ten=', Ten, 'Temp_before_Ten=',round(Temp_before_Ten,3), 'Time_Сooling=',round(Time_Сooling,1), 'Time_Inerc=',round(Time_Inerc,1))
 	#print('PID=',PID)
 	#print('Temp=',Temp)
 	#Вычисляем следующее значение времени
@@ -137,9 +149,12 @@ while t <= TimeMod:
 	# Temp = Temp + TimeStep
 	
 plt.plot(time_for_plot , temp_for_plot, label='temp', color='r')
+plt.plot(time_for_plot , ten_for_plot, label='ten', color='r')
+plt.plot(time_for_plot , inertia_for_plot, label='inertia', color='g')
+plt.plot(time_for_plot , cooling_for_plot, label='cooling', color='b')
 
-plt.locator_params (axis='x', nbins= 20 )
-plt.locator_params (axis='y', nbins= 20 )
+plt.locator_params (axis='x', nbins= 50 )
+plt.locator_params (axis='y', nbins= 50 )
 # plt.ylabel("температура")
 plt.xlabel("время")
 plt.grid()
