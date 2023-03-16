@@ -95,10 +95,10 @@ while t <= TimeMod:
 		PWM_N = PWM_N+1
 		if (PID>=1):
 			PWM_ON = PWM_period
-		if (PID>=0) and (PID<=1):
-			PWM_ON = PWM_min * round(PID*PWM_Step)
-		if (PID<=0):
+		elif (PID<=0):
 			PWM_ON = 0
+		else:
+			PWM_ON = PWM_min * round(PID*PWM_Step)
 	if (t-(PWM_N-1) * PWM_period < PWM_ON):	# проверяем включен ли ШИМ в данный момент времени.
 		if (Ten == False):
 			Temp_before_Ten = Temp
