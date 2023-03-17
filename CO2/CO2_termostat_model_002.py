@@ -6,6 +6,8 @@ import time
 # from numba import jit
 # @jit(fastmath=True, parallel=True)
 
+start_all = time.monotonic()
+
 loop_var = 3
 loop_counter = 1
 color=['r','g','b']
@@ -149,7 +151,7 @@ while loop_counter<=loop_var:
 		#Вычисляем следующее значение времени
 		t = round((t + TimeStep),Number_of_decimals)
 		
-	print('Time work', '%.2f' %(time.monotonic()-start))
+	print('Time count loop',str(loop_counter), '%.2f' %(time.monotonic()-start), "сек")
 	
 	plt.plot(time_for_plot , temp_for_plot, label=('temp'+str(loop_counter)), color=color[loop_counter-1])
 	loop_counter+=1
@@ -165,6 +167,7 @@ plt.locator_params (axis='y', nbins= 50 )
 plt.xlabel("время")
 plt.grid()
 plt.legend()
-print('Time work', '%.2f' %(time.monotonic()-start))
+print('Time printing chart', '%.2f' %(time.monotonic()-start), "сек")
+print('Time all counts', '%.2f' %(time.monotonic()-start_all), "сек")
 plt.show()
 
