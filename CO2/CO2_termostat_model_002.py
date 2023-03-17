@@ -158,6 +158,7 @@ while loop_counter<=loop_var:
 # plt.plot(time_for_plot , cooling_for_plot, label='cooling', color='b')
 # mngr = plt.get_current_fig_manager()
 # mngr.window.setGeometry(50,100,640, 545)
+start = time.monotonic()
 plt.locator_params (axis='x', nbins= 50 )
 plt.locator_params (axis='y', nbins= 50 )
 # plt.ylabel("температура")
