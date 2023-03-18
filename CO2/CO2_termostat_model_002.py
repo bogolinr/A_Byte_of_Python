@@ -8,16 +8,16 @@ import time
 
 start_all = time.monotonic()
 
-loop_var = 3
+loop_var = 2
 loop_counter = 1
 color=['r','g','b']
-cooficients=[[1,2,3],[4,5,6],[7,8,9]]
+cooficients=[[1e-3,25e-4,3],[0.01,0.1,10],[0.01,5e-3,10]]
 while loop_counter<=loop_var:
 
 	Cooling = False
 	TempCabinet = 25				#начальная температура.
 	'''начальная температура.'''
-	TempUstavka = 30				#целевая температура, которую должен поддерживать термостат.
+	TempUstavka = 35				#целевая температура, которую должен поддерживать термостат.
 	'''целевая температура, которую должен поддерживать термостат.'''
 	Temp = TempCabinet				#текущая температура термостата.
 	'''текущая температура термостата.'''
@@ -31,7 +31,7 @@ while loop_counter<=loop_var:
 	'''температура в момент начала охлаждения.'''
 	Cooling = 0
 	'''остывание'''
-	TimeMod = 4000*10					#длительность моделирования.
+	TimeMod = 40000					#длительность моделирования.
 	'''длительность моделирования.'''
 	TimeStep = 0.1					#шаг изменеиня времени, значение должно быть кратно целым числам.
 	'''шаг изменеиня времени, значение должно быть кратно целым числам.'''
@@ -161,8 +161,8 @@ while loop_counter<=loop_var:
 # mngr = plt.get_current_fig_manager()
 # mngr.window.setGeometry(50,100,640, 545)
 start = time.monotonic()
-plt.locator_params (axis='x', nbins= 50 )
-plt.locator_params (axis='y', nbins= 50 )
+plt.locator_params (axis='x', nbins= 40 )
+plt.locator_params (axis='y', nbins= 20 )
 # plt.ylabel("температура")
 plt.xlabel("время")
 plt.grid()
