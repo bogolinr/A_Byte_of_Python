@@ -12,7 +12,7 @@ fig, (ax1, ax2, ax3) = plt.subplots(3)
 loop_var = 2
 loop_counter = 1
 color=['r','g','b']
-cooficients=[[7e-3,30e-3,1],[7e-3,35e-3,1],[0.01,5e-3,10]]
+cooficients=[[10e-3,60e-3,10],[7e-3,35e-3,1],[0.01,5e-3,10]]
 while loop_counter<=loop_var:
 
 	Cooling = False
