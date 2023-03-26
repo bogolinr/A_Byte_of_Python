@@ -81,6 +81,8 @@ while loop_counter<=loop_var:
 
 	time_for_plot = []
 	temp_for_plot = []
+	ten_for_plot = []
+	inerrtia_for_plot = []
 
 	p_for_plot = []
 	i_for_plot = []
@@ -94,7 +96,12 @@ while loop_counter<=loop_var:
 	while t <= TimeMod:
 		time_for_plot.append(t)
 		temp_for_plot.append(Temp)
-
+		if (loop_counter == 1):
+			ten_for_plot.append(Ten)
+			inerrtia_for_plot.append(Inertia+5)
+		elif(loop_counter == 2):
+			ten_for_plot.append(Ten +2)
+			inerrtia_for_plot.append(Inertia+7)
 
 		# ten_for_plot.append(Ten)
 		# inertia_for_plot.append(Inertia*0.5)
@@ -125,12 +132,12 @@ while loop_counter<=loop_var:
 				PWM_ON = 0
 			else:
 				PWM_ON = PWM_min * round(PID*PWM_Step)
-		if (t-(PWM_N-1) * PWM_period < PWM_ON):	# проверяем включен ли ШИМ в данный момент времени.
+		if (t-(PWM_N-1) * PWM_period < PWM_ON and not Inertia):	# проверяем включен ли ШИМ в данный момент времени.
 			if (Ten == False):
 				Temp_before_Ten = Temp
 			Ten = True
 			Time_Сooling = 0
-			Inertia = False
+			# Inertia = False
 			Cooling = False
 			Temp = Temp_before_Ten + 160 * (1-2.115384 * math.exp(-1 / 1100 * Ten_time_on) + 1.115384 * math.exp(-1 / 580 * Ten_time_on))
 			Ten_time_on = Ten_time_on + TimeStep
@@ -166,6 +173,9 @@ while loop_counter<=loop_var:
 	print('Time count loop',str(loop_counter), '%.2f' %(time.monotonic()-start), "сек")
 	
 	ax1.plot(time_for_plot , temp_for_plot, label=('temp'+str(loop_counter)), color=color[loop_counter-1])
+	ax1.plot(time_for_plot , ten_for_plot, label=('ten'+str(loop_counter)), color=color[loop_counter-1])
+	ax1.plot(time_for_plot , inerrtia_for_plot, label=('inertia'+str(loop_counter)), color=color[loop_counter-1])
+	
 	if(loop_counter == 1):
 		ax2.plot(time_for_k_plot, p_for_plot, color=color[0],label=('p'))
 		ax2.plot(time_for_k_plot, i_for_plot, color=color[1],label=('i'))
