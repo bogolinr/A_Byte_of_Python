@@ -12,7 +12,7 @@ start_all = time.monotonic()
 loop_var = 2
 loop_counter = 1
 color=['r','g','b']
-cooficients=[[5e-3,25e-4,3],[0.01,0.1,10],[0.01,5e-3,10]]
+cooficients=[[7e-3,30e-3,1],[7e-3,35e-3,1],[0.01,5e-3,10]]
 while loop_counter<=loop_var:
 
 	Cooling = False
@@ -95,6 +95,7 @@ while loop_counter<=loop_var:
 		time_for_plot.append(t)
 		temp_for_plot.append(Temp)
 
+
 		# ten_for_plot.append(Ten)
 		# inertia_for_plot.append(Inertia*0.5)
 		# cooling_for_plot.append(Cooling*1.5)
@@ -111,10 +112,10 @@ while loop_counter<=loop_var:
 			PID_integral = K_integral * sum(arr_Temp_Integral)
 			PID_differential = K_differential*(TempDiff - arr_Temp_Integral[-1 * Differential])
 			PID = PID_proportionally + PID_integral + PID_differential
-			p_for_plot.append(PID_proportionally)
-			i_for_plot.append(PID_integral)
-			d_for_plot.append(PID_differential)
-			time_for_k_plot.append(t)
+		p_for_plot.append(PID_proportionally)
+		i_for_plot.append(PID_integral)
+		d_for_plot.append(PID_differential)
+		time_for_k_plot.append(t)
 		#ШИМ генератор
 		if (PWM_N==int(t / PWM_period)):
 			PWM_N = PWM_N+1
@@ -138,7 +139,7 @@ while loop_counter<=loop_var:
 			#Расчитываем время инерционного нагрева один раз после выключения тена.
 			if (Ten == True):
 				Ten = False
-				Time_Inerc_duration = t + 650 / (1+math.exp(-1 * 0.09* (Ten_time_on-70)))
+				Time_Inerc_duration = t + 650 / (1+math.exp(-1 * 0.15* (Ten_time_on-40)))
 				Ten_time_on = 0
 				Inertia = True
 				Temp_before_Inerc = Temp
@@ -163,11 +164,20 @@ while loop_counter<=loop_var:
 		t = round((t + TimeStep),Number_of_decimals)
 		
 	print('Time count loop',str(loop_counter), '%.2f' %(time.monotonic()-start), "сек")
-	
-	plt.plot(time_for_plot , temp_for_plot, label=('temp'+str(loop_counter)), color=color[loop_counter-1])
-	# plt.plot(time_for_k_plot, PID_proportionally)
-	# plt.plot(time_for_k_plot, PID_integral)
-	# plt.plot(time_for_k_plot, PID_differential)
+	fig, (ax1, ax2) = plt.subplots(2)
+	ax1.plot(time_for_plot , temp_for_plot, label=('temp'+str(loop_counter)), color=color[loop_counter-1])
+	ax2.plot(time_for_k_plot, p_for_plot, color=color[0],label=('p'))
+	ax2.plot(time_for_k_plot, i_for_plot, color=color[1],label=('i'))
+	ax2.plot(time_for_k_plot, d_for_plot, color=color[2],label=('d'))
+	ax1.grid()
+	ax2.grid()
+	ax1.legend()
+	ax2.legend()
+	ax1.locator_params (axis='x', nbins= 40 )
+	ax1.locator_params (axis='y', nbins= 20 )
+	ax2.locator_params (axis='x', nbins= 40 )
+	ax2.locator_params (axis='y', nbins= 20 )
+
 
 	loop_counter+=1
 # plt.plot(time_for_plot , ten_for_plot, label='ten', color='r')
@@ -179,8 +189,8 @@ start = time.monotonic()
 plt.locator_params (axis='x', nbins= 40 )
 plt.locator_params (axis='y', nbins= 20 )
 # plt.ylabel("температура")
-plt.xlabel("время")
-plt.grid()
+# plt.xlabel("время")
+
 plt.legend()
 print('Time printing chart', '%.2f' %(time.monotonic()-start), "сек")
 print('Time all counts', '%.2f' %(time.monotonic()-start_all), "сек")
