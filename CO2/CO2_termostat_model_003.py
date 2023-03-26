@@ -8,7 +8,7 @@ import time
 # @jit(fastmath=True, parallel=True)
 
 start_all = time.monotonic()
-
+fig, (ax1, ax2, ax3) = plt.subplots(3)
 loop_var = 2
 loop_counter = 1
 color=['r','g','b']
@@ -164,19 +164,27 @@ while loop_counter<=loop_var:
 		t = round((t + TimeStep),Number_of_decimals)
 		
 	print('Time count loop',str(loop_counter), '%.2f' %(time.monotonic()-start), "сек")
-	fig, (ax1, ax2) = plt.subplots(2)
+	
 	ax1.plot(time_for_plot , temp_for_plot, label=('temp'+str(loop_counter)), color=color[loop_counter-1])
-	ax2.plot(time_for_k_plot, p_for_plot, color=color[0],label=('p'))
-	ax2.plot(time_for_k_plot, i_for_plot, color=color[1],label=('i'))
-	ax2.plot(time_for_k_plot, d_for_plot, color=color[2],label=('d'))
-	ax1.grid()
-	ax2.grid()
-	ax1.legend()
-	ax2.legend()
-	ax1.locator_params (axis='x', nbins= 40 )
-	ax1.locator_params (axis='y', nbins= 20 )
-	ax2.locator_params (axis='x', nbins= 40 )
-	ax2.locator_params (axis='y', nbins= 20 )
+	if(loop_counter == 1):
+		ax2.plot(time_for_k_plot, p_for_plot, color=color[0],label=('p'))
+		ax2.plot(time_for_k_plot, i_for_plot, color=color[1],label=('i'))
+		ax2.plot(time_for_k_plot, d_for_plot, color=color[2],label=('d'))
+		ax2.grid()
+		ax2.legend()
+		ax2.locator_params (axis='x', nbins= 40 )
+		ax2.locator_params (axis='y', nbins= 20 )
+
+	elif(loop_counter ==2 ):
+		ax3.plot(time_for_k_plot, p_for_plot, color=color[0],label=('p'))
+		ax3.plot(time_for_k_plot, i_for_plot, color=color[1],label=('i'))
+		ax3.plot(time_for_k_plot, d_for_plot, color=color[2],label=('d'))
+		ax3.grid()
+		ax3.legend()
+		ax3.locator_params (axis='x', nbins= 40 )
+		ax3.locator_params (axis='y', nbins= 20 )
+
+
 
 
 	loop_counter+=1
@@ -190,7 +198,11 @@ plt.locator_params (axis='x', nbins= 40 )
 plt.locator_params (axis='y', nbins= 20 )
 # plt.ylabel("температура")
 # plt.xlabel("время")
-
+ax1.grid()
+ax1.legend()
+	
+ax1.locator_params (axis='x', nbins= 40 )
+ax1.locator_params (axis='y', nbins= 20 )
 plt.legend()
 print('Time printing chart', '%.2f' %(time.monotonic()-start), "сек")
 print('Time all counts', '%.2f' %(time.monotonic()-start_all), "сек")
