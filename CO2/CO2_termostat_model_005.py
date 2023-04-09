@@ -12,13 +12,13 @@ fig, (ax1, ax2, ax3) = plt.subplots(3)
 loop_var = 2
 loop_counter = 1
 color=['r','g','b']
-cooficients=[[150e-3,0,0],[150e-3,1e-2,500],[0.01,5e-3,10]]
+cooficients=[[150e-3,0,0],[140e-3,1e-1,0],[0.01,5e-3,10]]
 while loop_counter<=loop_var:
 
 	Cooling = False
 	TempCabinet = 25				#начальная температура.
 	'''начальная температура.'''
-	TempUstavka = 35				#целевая температура, которую должен поддерживать термостат.
+	TempUstavka = 45				#целевая температура, которую должен поддерживать термостат.
 	'''целевая температура, которую должен поддерживать термостат.'''
 	Temp = TempCabinet				#текущая температура термостата.
 	'''текущая температура термостата.'''
@@ -64,7 +64,9 @@ while loop_counter<=loop_var:
 	'''количество знаков после запятой'''
 	K_proportionally = 0.1			#коэффициэкнт пропорциональной составляющей.
 	'''коэффициэкнт пропорциональной составляющей.'''
-	Integral = 50					#время интегрирования ПИД регулятора в секундах.
+	TempDiff_Trigger_threshold = 0.03
+	'''порог ошибки регулирования, меншье которой включается интегра и диф составляющие ПИД'''
+	Integral = 30					#время интегрирования ПИД регулятора в секундах.
 	'''время интегрирования ПИД регулятора в секундах'''
 	arr_Temp_Integral = [(TempUstavka - TempCabinet)] * Integral	#массив предыдущих температур за время интегрирования.
 	'''массив предыдущих температур за время интегрирования'''
@@ -112,13 +114,24 @@ while loop_counter<=loop_var:
 		#Реальный датчик температуры выдаёт значения один раз в секунду, поэтому записываем в массив
 		#данные температуры,полученные в целые значения текущего времени.
 		if int(t) == t:
-			arr_Temp_Integral.append(round(TempDiff,Number_of_decimals))    #добавляет ошибку температуры в конец массива.
-			del arr_Temp_Integral[0]
-			#Вычисляем реакцию ПИД регулятора на сигнал ошибки
-			PID_proportionally = K_proportionally * TempDiff
-			PID_integral = K_integral * sum(arr_Temp_Integral)
-			PID_differential = K_differential*(TempDiff - arr_Temp_Integral[-1 * Differential])
-			PID = PID_proportionally + PID_integral + PID_differential
+			if TempDiff >= TempDiff_Trigger_threshold * TempUstavka:
+				PID_proportionally = K_proportionally * TempDiff
+				PID_integral = 0
+				PID_differential = 0
+				PID = PID_proportionally
+			elif(TempDiff<0):
+				PID_proportionally =0
+				PID_integral = 0
+				PID_differential = 0
+				PID = 0
+			else:
+				arr_Temp_Integral.append(round(TempDiff,Number_of_decimals))    #добавляет ошибку температуры в конец массива.
+				del arr_Temp_Integral[0]
+				#Вычисляем реакцию ПИД регулятора на сигнал ошибки
+				PID_proportionally = K_proportionally * TempDiff
+				PID_integral = K_integral * sum(arr_Temp_Integral)
+				PID_differential = K_differential*(TempDiff - arr_Temp_Integral[-1 * Differential])
+				PID = PID_proportionally + PID_integral + PID_differential
 		p_for_plot.append(PID_proportionally)
 		i_for_plot.append(PID_integral)
 		d_for_plot.append(PID_differential)
